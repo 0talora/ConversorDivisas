@@ -1,1 +1,10 @@
-/* You can add global styles to this file, and also import other style files */
+* {
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+html, body, app-root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: block;
+}
