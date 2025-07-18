@@ -9,34 +9,30 @@
       <div class="parametros">
 
         <div class="cantidadDiv">
-          <span>Cantidad:</span>
-          <input type="number" [(ngModel)]="cantidad">
+          <label>Cantidad:</label>
+          <input type="number" [(ngModel)]="cantidad" (ngModelChange)="convertir()" />
         </div>
 
         <div class="monedaDeDiv">
-          <label for="selectA">Opción A:</label>
+          <label for="selectA">Convertir de:</label>
           <select id="selectA" [formControl]="fromControl">
-            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}
-            </option>
+            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}</option>
           </select>
         </div>
 
         <div class="monedaADiv">
-          <label for="selectB">Opción B:</label>
+          <label for="selectB">Convertir a:</label>
           <select id="selectB" [formControl]="toControl">
-            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}
-            </option>
+            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}</option>
           </select>
         </div>
 
       </div>
-      <div class="btnDiv">
-        <button (click)="convertir()">Convertir</button>
-        <span>Resultado:</span>
-        <span>{{ resultado() }}</span>
+      <div class="importeDiv">
+        <label>Importe:</label>
+        <span>{{ resultado() }} {{ to() }}</span>
       </div>
     </div>
-
 
   </div>
 
