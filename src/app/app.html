@@ -5,35 +5,37 @@
   </div>
 
   <div class="parametrosDiv">
-    <div class="parametrosBtnDiv">
-      <div class="parametros">
 
-        <div class="cantidadDiv">
-          <label>Cantidad:</label>
-          <input type="number" [(ngModel)]="cantidad" (ngModelChange)="convertir()" />
-        </div>
+    <div class="parametrosFila">
 
-        <div class="monedaDeDiv">
-          <label for="selectA">Convertir de:</label>
-          <select id="selectA" [formControl]="fromControl">
-            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}</option>
-          </select>
-        </div>
-
-        <div class="monedaADiv">
-          <label for="selectB">Convertir a:</label>
-          <select id="selectB" [formControl]="toControl">
-            <option *ngFor="let opcion of monedas" [value]="opcion.siglas">{{opcion.siglas}} {{ opcion.nombre }}</option>
-          </select>
-        </div>
-
+      <div class="cantidadDiv">
+        <label>Cantidad:</label>
+        <input type="number" [(ngModel)]="cantidad" (ngModelChange)="convertir()" />
       </div>
-      <div class="importeDiv">
-        <label>Importe:</label>
-        <span>{{ resultado() }} {{ to() }}</span>
+
+      <div class="monedaDeDiv">
+        <label for="selectA">Convertir de:</label>
+        <select id="selectA" [formControl]="fromControl">
+          <option *ngFor="let opcion of monedas" [value]="opcion.siglas">
+            {{opcion.siglas}} {{ opcion.nombre }}
+          </option>
+        </select>
+      </div>
+
+      <div class="monedaADiv">
+        <label for="selectB">Convertir a:</label>
+        <select id="selectB" [formControl]="toControl">
+          <option *ngFor="let opcion of monedas" [value]="opcion.siglas">
+            {{opcion.siglas}} {{ opcion.nombre }}
+          </option>
+        </select>
       </div>
     </div>
 
+    <div class="importeDiv">
+      <label>Importe:</label>
+      <span>{{ resultado() }} {{ to() }}</span>
+    </div>
   </div>
 
 </div>
