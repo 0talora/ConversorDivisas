@@ -136,15 +136,16 @@ select:focus {
     color: beige;
   }
 
-  .parametrosFila {
-    display: flex;
-    flex-direction: column;
-  }
-
   .parametrosDiv {
     height: 40%;
     width: 70%;
     gap: 1rem;
+  }
+
+  .parametrosFila {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
   }
 
 }
