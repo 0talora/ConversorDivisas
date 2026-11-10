@@ -1,43 +1,73 @@
-<div class="contenido">
-
-  <div class="titulo">
-    <h1>CONVERSOR DE MONEDAS</h1>
+<header class="cabecera">
+  <div class="barra">
+    <span class="marca">otalora</span>
+    <div class="idioma">
+      <label for="language">{{ strings().language }}</label>
+      <select id="language" [value]="language" (change)="changeLanguage($any($event.target).value)">
+        @for (code of languageCodes; track code) {
+          <option [value]="code" [attr.lang]="code">{{ languages[code] }}</option>
+        }
+      </select>
+    </div>
   </div>
+</header>
 
-  <div class="parametrosDiv">
+<main class="contenedor">
+  <header class="introduccion">
+    <div>
+      <h1>{{ strings().title }}</h1>
+      <p>{{ strings().description }}</p>
+    </div>
+    <div class="emblema" aria-hidden="true">
+      <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" focusable="false">
+        <path d="M5 10h20l-4-4m4 4-4 4M27 22H7l4 4m-4-4 4-4"/>
+      </svg>
+    </div>
+  </header>
 
-    <div class="parametrosFila">
-
-      <div class="cantidadDiv">
-        <label>Cantidad:</label>
-        <input type="number" [(ngModel)]="cantidad" (ngModelChange)="convertir()" />
+  <section class="conversor" [attr.aria-label]="strings().title">
+    <div class="campos">
+      <div class="campo">
+        <label for="amount">{{ strings().amount }}</label>
+        <input id="amount" type="number" min="0.01" step="any" inputmode="decimal" [formControl]="amountControl">
       </div>
 
-      <div class="monedaDeDiv">
-        <label for="selectA">Convertir de:</label>
+      <div class="campo">
+        <label for="selectA">{{ strings().from }}</label>
         <select id="selectA" [formControl]="fromControl">
-          <option *ngFor="let opcion of monedas" [value]="opcion.siglas">
-            {{opcion.siglas}} {{ opcion.nombre }}
-          </option>
+          @for (option of currencyOptions(); track option.code) {
+            <option [value]="option.code">{{ option.code }} · {{ option.name }}</option>
+          }
         </select>
       </div>
 
-      <div class="monedaADiv">
-        <label for="selectB">Convertir a:</label>
+      <div class="campo">
+        <label for="selectB">{{ strings().to }}</label>
         <select id="selectB" [formControl]="toControl">
-          <option *ngFor="let opcion of monedas" [value]="opcion.siglas">
-            {{opcion.siglas}} {{ opcion.nombre }}
-          </option>
+          @for (option of currencyOptions(); track option.code) {
+            <option [value]="option.code">{{ option.code }} · {{ option.name }}</option>
+          }
         </select>
       </div>
     </div>
 
-    <div class="importeDiv">
-      <label>Importe:</label>
-      <span>{{ resultado() }} {{ to() }}</span>
+    <div class="resultado" aria-live="polite" aria-atomic="true">
+      <h2>{{ strings().result }}</h2>
+      @if (loading()) {
+        <p class="aviso">{{ strings().loading }}</p>
+      } @else if (sameCurrency()) {
+        <p class="aviso">{{ strings().sameCurrency }}</p>
+      } @else if (error()) {
+        <p class="aviso">{{ strings().error }}</p>
+      } @else {
+        <p class="importe">{{ getFormattedResult() }} <span>{{ toControl.value }}</span></p>
+      }
     </div>
-  </div>
+  </section>
+</main>
 
-</div>
+<footer class="footer">
+  <p>{{ strings().developed }} <a href="https://angular.dev/">Angular</a> {{ strings().by }}</p>
+</footer>
 
 <router-outlet />

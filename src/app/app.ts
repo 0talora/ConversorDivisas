@@ -1,98 +1,158 @@
-import { CommonModule } from '@angular/common';
-import { Component, signal } from '@angular/core';
-import { ReactiveFormsModule, FormControl, FormsModule } from '@angular/forms';
-import {  RouterOutlet } from '@angular/router'; // Importa el módulo, no RouterOutlet
+import { DOCUMENT, CommonModule } from '@angular/common';
+import { Meta, Title } from '@angular/platform-browser';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterOutlet } from '@angular/router';
+import { catchError, combineLatest, distinctUntilChanged, map, of, startWith, switchMap } from 'rxjs';
 import { ConversorService } from './conversor-service';
+
+const currencyCodes = [
+  'USD', 'EUR', 'JPY', 'GBP', 'CNY', 'CHF', 'CAD', 'AUD', 'INR', 'MXN', 'BRL',
+  'BGN', 'CZK', 'DKK', 'HKD', 'HUF', 'IDR', 'ILS', 'ISK', 'KRW', 'MYR', 'NOK',
+  'NZD', 'PHP', 'PLN', 'RON', 'SEK', 'SGD', 'THB', 'TRY', 'ZAR'
+];
+
+export const languages = { es: 'Español', en: 'English', fr: 'Français', de: 'Deutsch' };
+type Language = keyof typeof languages;
+const languageKey = 'currency-converter-language';
+const copy = {
+  es: {
+    title: 'Conversor de divisas', pageTitle: 'Conversor de divisas online | otalora', description: 'Consulta el cambio entre las principales monedas del mundo.',
+    language: 'Idioma', amount: 'Cantidad', from: 'Convertir de', to: 'Convertir a',
+    result: 'Importe convertido', loading: 'Consultando el tipo de cambio…',
+    error: 'No se pudo obtener el cambio. Inténtalo de nuevo.',
+    sameCurrency: 'Elige dos monedas distintas.', developed: 'Desarrollado con', by: 'por Pablo Otalora'
+  },
+  en: {
+    title: 'Currency converter', pageTitle: 'Online currency converter | otalora', description: 'Check exchange rates between the world’s major currencies.',
+    language: 'Language', amount: 'Amount', from: 'Convert from', to: 'Convert to',
+    result: 'Converted amount', loading: 'Getting the exchange rate…',
+    error: 'Could not get the exchange rate. Please try again.',
+    sameCurrency: 'Choose two different currencies.', developed: 'Built with', by: 'by Pablo Otalora'
+  },
+  fr: {
+    title: 'Convertisseur de devises', pageTitle: 'Convertisseur de devises en ligne | otalora', description: 'Consultez les taux de change des principales devises mondiales.',
+    language: 'Langue', amount: 'Montant', from: 'Convertir de', to: 'Convertir en',
+    result: 'Montant converti', loading: 'Récupération du taux de change…',
+    error: 'Impossible de récupérer le taux. Réessayez.',
+    sameCurrency: 'Choisissez deux devises différentes.', developed: 'Développé avec', by: 'par Pablo Otalora'
+  },
+  de: {
+    title: 'Währungsrechner', pageTitle: 'Online-Währungsrechner | otalora', description: 'Vergleiche Wechselkurse der wichtigsten Währungen weltweit.',
+    language: 'Sprache', amount: 'Betrag', from: 'Umrechnen von', to: 'Umrechnen in',
+    result: 'Umgerechneter Betrag', loading: 'Wechselkurs wird abgerufen…',
+    error: 'Wechselkurs konnte nicht abgerufen werden. Bitte erneut versuchen.',
+    sameCurrency: 'Wähle zwei verschiedene Währungen.', developed: 'Entwickelt mit', by: 'von Pablo Otalora'
+  }
+};
+
+function isLanguage(value: string): value is Language {
+  return Object.hasOwn(languages, value);
+}
 
 @Component({
   selector: 'app-root',
   standalone: true,
   imports: [RouterOutlet, CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './app.html',
-  styleUrls: ['./app.css']
+  styleUrl: './app.css'
 })
 export class App {
-  protected title = 'ConversorDivisas';
+  private readonly converter = inject(ConversorService);
+  private readonly document = inject(DOCUMENT);
+  private readonly titleService = inject(Title);
+  private readonly metaService = inject(Meta);
+  private readonly destroyRef = inject(DestroyRef);
+  protected readonly languages = languages;
+  protected readonly languageCodes = Object.keys(languages) as Language[];
+  protected language: Language;
+  protected readonly fromControl = new FormControl('EUR', { nonNullable: true });
+  protected readonly toControl = new FormControl('USD', { nonNullable: true });
+  protected readonly amountControl = new FormControl(1, { nonNullable: true });
+  protected readonly result = signal<number | null>(null);
+  protected readonly loading = signal(false);
+  protected readonly error = signal(false);
+  protected readonly sameCurrency = signal(false);
+  protected readonly currencyOptions = signal<{ code: string; name: string }[]>([]);
+  protected readonly strings = () => copy[this.language];
 
-  cantidad: number = 1;
-  from = signal<string>('EUR');
-  to = signal<string>('USD');
-  resultado = signal<number | null>(null);
-
-  fromControl = new FormControl('EUR');
-  toControl = new FormControl('USD');
-
-constructor(private conversorService: ConversorService) {
-  this.fromControl.valueChanges.subscribe(valor => {
-    this.from.set(valor ?? '');
-    this.convertir();
-  });
-
-  this.toControl.valueChanges.subscribe(valor => {
-    this.to.set(valor ?? '');
-    this.convertir();
-  });
-}
-
-monedas: { siglas: string; nombre: string; imagen: string }[] = [
-  { siglas: "USD", nombre: "Dólar estadounidense", imagen: "assets/banderas/estados-unidos-de-america.png" },
-  { siglas: "EUR", nombre: "Euro", imagen: "assets/banderas/union-europea.png" },
-  { siglas: "JPY", nombre: "Yen japonés", imagen: "assets/banderas/japon.png" },
-  { siglas: "GBP", nombre: "Libra esterlina", imagen: "assets/banderas/reino-unido.png" },
-  { siglas: "CNY", nombre: "Yuan renminbi chino", imagen: "assets/banderas/porcelana.png" },
-  { siglas: "CHF", nombre: "Franco suizo", imagen: "assets/banderas/suiza.png" },
-  { siglas: "CAD", nombre: "Dólar canadiense", imagen: "assets/banderas/canada.png" },
-  { siglas: "AUD", nombre: "Dólar australiano", imagen: "assets/banderas/australia.png" },
-  { siglas: "INR", nombre: "Rupia india", imagen: "assets/banderas/mundo.png" }, // No se encontró India
-  { siglas: "MXN", nombre: "Peso mexicano", imagen: "assets/banderas/mundo.png" }, // No se encontró México
-  { siglas: "BRL", nombre: "Real brasileño", imagen: "assets/banderas/brasil.png" },
-
-  // Resto de monedas
-  { siglas: "BGN", nombre: "Lev búlgaro", imagen: "assets/banderas/bulgaria.png" },
-  { siglas: "CZK", nombre: "Corona checa", imagen: "assets/banderas/republica-checa.png" },
-  { siglas: "DKK", nombre: "Corona danesa", imagen: "assets/banderas/dinamarca.png" },
-  { siglas: "HKD", nombre: "Dólar de Hong Kong", imagen: "assets/banderas/hong-kong.png" },
-  { siglas: "HUF", nombre: "Florín húngaro", imagen: "assets/banderas/hungria.png" },
-  { siglas: "IDR", nombre: "Rupia indonesia", imagen: "assets/banderas/bandera-de-indonesia.png" },
-  { siglas: "ILS", nombre: "Nuevo séquel israelí", imagen: "assets/banderas/israel.png" },
-  { siglas: "ISK", nombre: "Corona islandesa", imagen: "assets/banderas/islandia.png" },
-  { siglas: "KRW", nombre: "Won surcoreano", imagen: "assets/banderas/corea-del-sur.png" },
-  { siglas: "MYR", nombre: "Ringgit malayo", imagen: "assets/banderas/malasia.png" },
-  { siglas: "NOK", nombre: "Corona noruega", imagen: "assets/banderas/noruega.png" },
-  { siglas: "NZD", nombre: "Dólar neozelandés", imagen: "assets/banderas/nueva-zelanda.png" },
-  { siglas: "PHP", nombre: "Peso filipino", imagen: "assets/banderas/filipinas.png" },
-  { siglas: "PLN", nombre: "Złoty polaco", imagen: "assets/banderas/polonia.png" },
-  { siglas: "RON", nombre: "Leu rumano", imagen: "assets/banderas/rumania.png" },
-  { siglas: "SEK", nombre: "Corona sueca", imagen: "assets/banderas/suecia.png" },
-  { siglas: "SGD", nombre: "Dólar singapurense", imagen: "assets/banderas/singapur.png" },
-  { siglas: "THB", nombre: "Baht tailandés", imagen: "assets/banderas/tailandia.png" },
-  { siglas: "TRY", nombre: "Lira turca", imagen: "assets/banderas/pavo.png" },
-  { siglas: "ZAR", nombre: "Rand sudafricano", imagen: "assets/banderas/sudafrica.png" },
-];
-
-  ngOnInit(): void {
-    this.convertir();
+  constructor() {
+    this.language = this.detectLanguage();
+    this.updateCurrencyNames();
+    this.updateMetadata();
+    combineLatest([
+      this.fromControl.valueChanges.pipe(startWith(this.fromControl.value), distinctUntilChanged()),
+      this.toControl.valueChanges.pipe(startWith(this.toControl.value), distinctUntilChanged()),
+      this.amountControl.valueChanges.pipe(startWith(this.amountControl.value), distinctUntilChanged())
+    ]).pipe(
+      switchMap(([from, to, amount]) => {
+        this.result.set(null);
+        this.error.set(false);
+        if (!Number.isFinite(amount) || amount <= 0) {
+          this.loading.set(false);
+          this.sameCurrency.set(false);
+          return of(null);
+        }
+        if (from === to) {
+          this.loading.set(false);
+          this.sameCurrency.set(true);
+          return of(null);
+        }
+        this.sameCurrency.set(false);
+        this.loading.set(true);
+        return this.converter.convertir(from, to, amount).pipe(
+          map(value => ({ value, failed: false })),
+          catchError(() => of({ value: null, failed: true }))
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(response => {
+      this.loading.set(false);
+      this.error.set(Boolean(response?.failed));
+      this.result.set(response?.value === null ? null : Number(response?.value.toFixed(2)));
+    });
   }
 
-  convertir() {
-    console.log('convertir() llamado');
-    const from = this.from();
-    const to = this.to();
-    const amount = this.cantidad ?? 0;
-
-    if (from && to && amount > 0) {
-      this.conversorService.convertir(from, to, amount).subscribe(resultado => {
-        const resultadoRedondeado = Number(resultado.toFixed(2));
-        this.resultado.set(resultadoRedondeado);
-      });
-    } else {
-      console.log('Datos incompletos o inválidos:', { from, to, amount });
+  changeLanguage(value: string): void {
+    if (!isLanguage(value)) return;
+    try {
+      localStorage.setItem(languageKey, value);
+    } catch {
+      // The selected language remains active for this page.
     }
+    this.language = value;
+    this.language = value;
+    this.updateMetadata();
+    this.updateCurrencyNames();
   }
 
-  getImagen(siglas: string | null): string | undefined {
-    return this.monedas.find(m => m.siglas === siglas)?.imagen;
+  getFormattedResult(): string {
+    const value = this.result();
+    if (value === null) return '—';
+    return new Intl.NumberFormat(this.language, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value);
   }
 
+  private detectLanguage(): Language {
+    try {
+      const saved = localStorage.getItem(languageKey);
+      if (saved && isLanguage(saved)) return saved;
+    } catch {
+      // Browser language detection remains available when storage is blocked.
+    }
+    return (navigator.languages.length ? navigator.languages : [navigator.language])
+      .map(locale => locale.toLowerCase().split('-')[0])
+      .find(isLanguage) ?? 'es';
+  }
 
+  private updateMetadata(): void {
+    this.document.documentElement.lang = this.language;
+    this.titleService.setTitle(copy[this.language].pageTitle);
+    this.metaService.updateTag({ name: 'description', content: copy[this.language].description });
+  }
+
+  private updateCurrencyNames(): void {
+    const names = new Intl.DisplayNames([this.language], { type: 'currency' });
+    this.currencyOptions.set(currencyCodes.map(code => ({ code, name: names.of(code) ?? code })));
+  }
 }

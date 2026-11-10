@@ -1,11 +1,29 @@
-* {
-  font-family: 'IBM Plex Mono', monospace;
+@font-face {
+  font-family: Doto;
+  src: url('/assets/fonts/doto.woff2') format('woff2');
+  font-weight: 900;
+  font-display: swap;
 }
-
-html, body, app-root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  display: block;
+@font-face {
+  font-family: 'Space Grotesk';
+  src: url('/assets/fonts/space-grotesk.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
 }
-
+@font-face {
+  font-family: 'Space Mono';
+  src: url('/assets/fonts/space-mono.woff2') format('woff2');
+  font-display: swap;
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+html, body { min-height: 100%; margin: 0; padding: 0; }
+app-root { min-height: 100vh; display: flex; flex-direction: column; }
+body {
+  min-height: 100vh;
+  background: #000 radial-gradient(circle, #2b2b2b 1px, transparent 1.2px) 0 0 / 24px 24px;
+  color: #fff;
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  line-height: 1.5;
+}
+:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
