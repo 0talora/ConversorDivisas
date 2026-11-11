@@ -167,18 +167,6 @@ p {
   color: #ff777b;
   font: .9rem/1.5 'Space Mono', monospace;
 }
-.footer {
-  flex: 0 0 auto;
-  width: 100%;
-  padding: 1rem;
-  border-top: 1px solid #2b2b2b;
-  background: #0b0b0b;
-  color: #d4d4d4;
-  text-align: center;
-  font: .875rem/1.5 'Space Mono', monospace;
-}
-.footer p { margin: 0; }
-.footer a { color: #ff4a4f; }
 @media (max-width: 42rem) {
   .campos { grid-template-columns: minmax(0, 1fr); }
   .introduccion { grid-template-columns: minmax(0, 1fr); }

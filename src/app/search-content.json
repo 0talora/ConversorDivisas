@@ -1,37 +1,37 @@
 {
   "es": {
     "title": "Conversor de divisas online | Euros, dólares y más",
-    "description": "Convierte euros a dólares, libras, yenes y otras monedas. Calcula el importe con tipos de cambio de referencia de Frankfurter.",
-    "heading": "Cómo convertir euros a dólares",
+    "description": "Convierte entre euros, dólares, libras, yenes y otras monedas. Calcula el importe con tipos de cambio de referencia de Frankfurter.",
+    "heading": "Cómo convertir de una divisa a otra",
     "paragraphs": [
-      "Introduce el importe, selecciona EUR como moneda de origen y USD como destino. El resultado se calcula automáticamente.",
+      "Introduce el importe y elige la divisa de origen y la divisa de destino. El resultado se calcula automáticamente.",
       "El cambio es orientativo. Tu banco o plataforma puede aplicar otro tipo de cambio y cobrar comisiones."
     ]
   },
   "en": {
     "title": "Online Currency Converter | EUR, USD, GBP and more",
     "description": "Convert euros, US dollars, pounds, yen and other currencies using Frankfurter reference exchange rates.",
-    "heading": "How to convert euros to US dollars",
+    "heading": "How to convert from one currency to another",
     "paragraphs": [
-      "Enter the amount, select EUR as the source and USD as the target. The result updates automatically.",
+      "Enter the amount and select the source and target currencies. The result updates automatically.",
       "The result is an estimate. Your bank or payment provider may use a different exchange rate and charge fees."
     ]
   },
   "fr": {
     "title": "Convertisseur de devises | Euros, dollars et livres",
     "description": "Convertissez des euros, dollars, livres ou yens avec les taux de change de référence de Frankfurter.",
-    "heading": "Convertir des euros en dollars américains",
+    "heading": "Comment convertir une devise en une autre",
     "paragraphs": [
-      "Saisissez le montant, sélectionnez EUR comme devise de départ et USD comme devise d’arrivée. Le résultat se calcule automatiquement.",
+      "Saisissez le montant et choisissez la devise de départ et la devise d’arrivée. Le résultat se calcule automatiquement.",
       "Le résultat est indicatif. Votre banque peut appliquer un autre taux de change et facturer des frais."
     ]
   },
   "de": {
     "title": "Online-Währungsrechner | Euro, Dollar und Pfund",
     "description": "Rechne Euro, US-Dollar, Pfund, Yen und weitere Währungen mit Referenzkursen von Frankfurter um.",
-    "heading": "Euro in US-Dollar umrechnen",
+    "heading": "So rechnest du eine Währung in eine andere um",
     "paragraphs": [
-      "Gib den Betrag ein, wähle EUR als Ausgangswährung und USD als Zielwährung. Das Ergebnis wird automatisch berechnet.",
+      "Gib den Betrag ein und wähle die Ausgangs- und die Zielwährung. Das Ergebnis wird automatisch berechnet.",
       "Das Ergebnis dient zur Orientierung. Banken können andere Wechselkurse verwenden und Gebühren erheben."
     ]
   }
