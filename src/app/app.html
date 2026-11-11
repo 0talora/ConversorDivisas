@@ -64,6 +64,19 @@
       }
     </div>
   </section>
+
+  <section class="search-guide">
+    <h2>{{ searchText.heading }}</h2>
+    @for (paragraph of searchText.paragraphs; track $index) {
+      <p>{{ paragraph }}</p>
+    }
+  </section>
+  <nav class="search-languages" [attr.aria-label]="strings().language">
+    @for (code of languageCodes; track code) {
+      <a [href]="languagePath(code)" [attr.hreflang]="code" [attr.lang]="code"
+        [attr.aria-current]="code === language ? 'page' : null">{{ languages[code] }}</a>
+    }
+  </nav>
 </main>
 
 <footer class="footer">

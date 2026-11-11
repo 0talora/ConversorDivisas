@@ -1,3 +1,4 @@
+import searchContent from './search-content.json';
 import { DOCUMENT, CommonModule } from '@angular/common';
 import { Meta, Title } from '@angular/platform-browser';
 import { Component, DestroyRef, inject, signal } from '@angular/core';
@@ -18,28 +19,28 @@ type Language = keyof typeof languages;
 const languageKey = 'currency-converter-language';
 const copy = {
   es: {
-    title: 'Conversor de divisas', pageTitle: 'Conversor de divisas online | otalora', description: 'Consulta el cambio entre las principales monedas del mundo.',
+    title: 'Conversor de divisas', description: 'Consulta el cambio entre las principales monedas del mundo.',
     language: 'Idioma', amount: 'Cantidad', from: 'Convertir de', to: 'Convertir a',
     result: 'Importe convertido', loading: 'Consultando el tipo de cambio…',
     error: 'No se pudo obtener el cambio. Inténtalo de nuevo.',
     sameCurrency: 'Elige dos monedas distintas.', developed: 'Desarrollado con', by: 'por Pablo Otalora'
   },
   en: {
-    title: 'Currency converter', pageTitle: 'Online currency converter | otalora', description: 'Check exchange rates between the world’s major currencies.',
+    title: 'Currency converter', description: 'Check exchange rates between the world’s major currencies.',
     language: 'Language', amount: 'Amount', from: 'Convert from', to: 'Convert to',
     result: 'Converted amount', loading: 'Getting the exchange rate…',
     error: 'Could not get the exchange rate. Please try again.',
     sameCurrency: 'Choose two different currencies.', developed: 'Built with', by: 'by Pablo Otalora'
   },
   fr: {
-    title: 'Convertisseur de devises', pageTitle: 'Convertisseur de devises en ligne | otalora', description: 'Consultez les taux de change des principales devises mondiales.',
+    title: 'Convertisseur de devises', description: 'Consultez les taux de change des principales devises mondiales.',
     language: 'Langue', amount: 'Montant', from: 'Convertir de', to: 'Convertir en',
     result: 'Montant converti', loading: 'Récupération du taux de change…',
     error: 'Impossible de récupérer le taux. Réessayez.',
     sameCurrency: 'Choisissez deux devises différentes.', developed: 'Développé avec', by: 'par Pablo Otalora'
   },
   de: {
-    title: 'Währungsrechner', pageTitle: 'Online-Währungsrechner | otalora', description: 'Vergleiche Wechselkurse der wichtigsten Währungen weltweit.',
+    title: 'Währungsrechner', description: 'Vergleiche Wechselkurse der wichtigsten Währungen weltweit.',
     language: 'Sprache', amount: 'Betrag', from: 'Umrechnen von', to: 'Umrechnen in',
     result: 'Umgerechneter Betrag', loading: 'Wechselkurs wird abgerufen…',
     error: 'Wechselkurs konnte nicht abgerufen werden. Bitte erneut versuchen.',
@@ -75,6 +76,14 @@ export class App {
   protected readonly error = signal(false);
   protected readonly sameCurrency = signal(false);
   protected readonly currencyOptions = signal<{ code: string; name: string }[]>([]);
+  protected get searchText() {
+    return searchContent[this.language];
+  }
+
+  protected languagePath(language: Language): string {
+    return language === 'es' ? '/' : `/${language}/`;
+  }
+
   protected readonly strings = () => copy[this.language];
 
   constructor() {
@@ -116,12 +125,15 @@ export class App {
 
   changeLanguage(value: string): void {
     if (!isLanguage(value)) return;
+    if (this.document.documentElement.hasAttribute('data-page-language') && value !== this.language) {
+      this.document.location.assign(this.languagePath(value));
+      return;
+    }
     try {
       localStorage.setItem(languageKey, value);
     } catch {
       // The selected language remains active for this page.
     }
-    this.language = value;
     this.language = value;
     this.updateMetadata();
     this.updateCurrencyNames();
@@ -134,6 +146,8 @@ export class App {
   }
 
   private detectLanguage(): Language {
+    const pageLanguage = this.document.documentElement.dataset['pageLanguage'];
+    if (pageLanguage && isLanguage(pageLanguage)) return pageLanguage;
     try {
       const saved = localStorage.getItem(languageKey);
       if (saved && isLanguage(saved)) return saved;
@@ -147,8 +161,8 @@ export class App {
 
   private updateMetadata(): void {
     this.document.documentElement.lang = this.language;
-    this.titleService.setTitle(copy[this.language].pageTitle);
-    this.metaService.updateTag({ name: 'description', content: copy[this.language].description });
+    this.titleService.setTitle(this.searchText.title);
+    this.metaService.updateTag({ name: 'description', content: this.searchText.description });
   }
 
   private updateCurrencyNames(): void {

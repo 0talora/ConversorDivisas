@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve --host 0.0.0.0",
-    "build": "ng build",
+    "build": "ng build && node scripts/build-search-pages.mjs dist/ConversorDivisas/browser https://moneyconversor.otalora.dev",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
