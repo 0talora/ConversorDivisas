@@ -1,16 +1,27 @@
 <header class="cabecera">
   <div class="barra">
     <span class="marca">otalora</span>
-    <div class="idioma">
-      <label for="language">{{ strings().language }}</label>
-      <select id="language" [value]="language" (change)="changeLanguage($any($event.target).value)">
+  </div>
+</header>
+<div class="preferences">
+  <label>
+    {{ strings().theme }}
+    <select id="theme" [ngModel]="themePreference.value()" (ngModelChange)="themePreference.set($event)">
+        @for (choice of themePreference.choices; track choice) {
+          <option [value]="choice">{{ strings().themeChoices[choice] }}</option>
+        }
+    </select>
+  </label>
+  <label>
+    {{ strings().language }}
+    <select id="language" [ngModel]="languageChoice" (ngModelChange)="changeLanguage($event)">
+      <option value="system">{{ strings().themeChoices.system }}</option>
         @for (code of languageCodes; track code) {
           <option [value]="code" [attr.lang]="code">{{ languages[code] }}</option>
         }
-      </select>
-    </div>
-  </div>
-</header>
+    </select>
+  </label>
+</div>
 
 <main class="contenedor">
   <header class="introduccion">
