@@ -3,4 +3,11 @@ import { appConfig } from './app/app.config';
 import { App } from './app/app';
 
 bootstrapApplication(App, appConfig)
-  .catch((err) => console.error(err));
+  .then(() => {
+    document.querySelector('[data-app-fallback]')?.remove();
+    delete document.documentElement.dataset['appStartup'];
+  })
+  .catch(error => {
+    document.documentElement.dataset['appStartup'] = 'failed';
+    console.error(error);
+  });
